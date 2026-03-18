@@ -1,0 +1,152 @@
+{
+  "timestamp": "2026-03-19T01:25:02.073420",
+  "total_score": 0,
+  "overall_level": "SAFE",
+  "market": {
+    "index": 5925.03,
+    "index_change": 5.04,
+    "trade_value": 268517.59,
+    "individual": 0.0,
+    "foreign": 0.0,
+    "institution": 0.0,
+    "margin_rate": 1.7225,
+    "margin_change": 0.21719999999999984
+  },
+  "market_signals": [
+    {
+      "name": "수급 괴리",
+      "level": "SAFE",
+      "score": 0,
+      "message": "정상 범위"
+    },
+    {
+      "name": "반등장 추격매수",
+      "level": "SAFE",
+      "score": 0,
+      "message": "정상"
+    },
+    {
+      "name": "거래량 체력",
+      "level": "SAFE",
+      "score": 0,
+      "message": "정상"
+    },
+    {
+      "name": "신용융자 잔고",
+      "level": "SAFE",
+      "score": 0,
+      "message": "정상"
+    },
+    {
+      "name": "뉴스 착각 패턴",
+      "level": "SAFE",
+      "score": 0,
+      "message": "정상"
+    },
+    {
+      "name": "구정보 함정",
+      "level": "SAFE",
+      "score": 0,
+      "message": "정상"
+    }
+  ],
+  "stock_signals": [
+    {
+      "name": "서울식품(004410)",
+      "level": "WARNING",
+      "score": 40,
+      "message": "당일 +11.9% 급등"
+    },
+    {
+      "name": "대우건설(047040)",
+      "level": "WARNING",
+      "score": 40,
+      "message": "당일 +22.8% 급등"
+    },
+    {
+      "name": "우리기술(032820)",
+      "level": "WARNING",
+      "score": 40,
+      "message": "당일 +21.6% 급등"
+    },
+    {
+      "name": "대원전선(006340)",
+      "level": "WARNING",
+      "score": 33,
+      "message": "당일 +15.0% 급등"
+    },
+    {
+      "name": "휴림로봇(090710)",
+      "level": "WARNING",
+      "score": 33,
+      "message": "당일 +10.8% 급등"
+    },
+    {
+      "name": "휴림에이텍(078590)",
+      "level": "WARNING",
+      "score": 33,
+      "message": "당일 +29.9% 급등"
+    },
+    {
+      "name": "네오펙트(290660)",
+      "level": "WARNING",
+      "score": 33,
+      "message": "당일 +11.3% 급등"
+    },
+    {
+      "name": "유니슨(018000)",
+      "level": "WARNING",
+      "score": 33,
+      "message": "당일 +15.0% 급등"
+    },
+    {
+      "name": "폴라리스오피스(041020)",
+      "level": "WARNING",
+      "score": 33,
+      "message": "당일 +10.6% 급등"
+    },
+    {
+      "name": "인베니아(079950)",
+      "level": "WARNING",
+      "score": 33,
+      "message": "당일 +13.3% 급등"
+    },
+    {
+      "name": "SK증권(001510)",
+      "level": "WARNING",
+      "score": 27,
+      "message": "당일 +8.7% 급등"
+    },
+    {
+      "name": "KODEX 코스닥150레버리지(233740)",
+      "level": "WARNING",
+      "score": 20,
+      "message": "당일 +5.7% 급등"
+    },
+    {
+      "name": "KODEX 2차전지산업레버리지(462330)",
+      "level": "WARNING",
+      "score": 20,
+      "message": "당일 +5.4% 급등"
+    },
+    {
+      "name": "한화생명(088350)",
+      "level": "WARNING",
+      "score": 20,
+      "message": "당일 +9.6% 급등"
+    },
+    {
+      "name": "KODEX 인버스(114800)",
+      "level": "WARNING",
+      "score": 15,
+      "message": "정상"
+    },
+    {
+      "name": "신성이엔지(011930)",
+      "level": "WARNING",
+      "score": 15,
+      "message": "정상"
+    }
+  ],
+  "scanned_count": 33
+}

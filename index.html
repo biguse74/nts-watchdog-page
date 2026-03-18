@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NTS 경제뉴탐사 위험경고 대시보드</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d2e;
+    --border: #2a2d3e;
+    --text: #e0e0e0;
+    --dim: #888;
+    --dim2: #666;
+    --safe: #22c55e;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --accent: #3b82f6;
+    --tip-bg: #1e2235;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'Pretendard', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #1a1d2e 0%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header h1 { font-size: 20px; font-weight: 600; }
+  .header .time { color: var(--dim); font-size: 14px; }
+  .header .refresh-btn {
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: opacity .2s;
+  }
+  .header .refresh-btn:hover { opacity: 0.8; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  .score-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .score-card .score { font-size: 72px; font-weight: 700; line-height: 1; }
+  .score-card .label { font-size: 16px; color: var(--dim); margin-top: 4px; }
+  .score-card .verdict {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 6px 24px;
+    border-radius: 20px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .verdict-SAFE { background: rgba(34,197,94,.15); color: var(--safe); }
+  .verdict-WARNING { background: rgba(245,158,11,.15); color: var(--warn); }
+  .verdict-DANGER { background: rgba(239,68,68,.15); color: var(--danger); }
+
+  .advice-box {
+    background: var(--tip-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  .advice-box .advice-title { font-weight: 600; margin-bottom: 6px; font-size: 15px; }
+  .advice-box .advice-body { color: var(--dim); font-size: 14px; }
+
+  .market-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .market-bar .item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .market-bar .item .val { font-size: 22px; font-weight: 600; }
+  .market-bar .item .lbl { font-size: 12px; color: var(--dim); margin-top: 4px; }
+  .market-bar .item .help { font-size: 11px; color: var(--dim2); margin-top: 6px; line-height: 1.4; }
+  .val-up { color: var(--danger); }
+  .val-down { color: var(--accent); }
+
+  .section-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; padding-left: 4px; }
+  .section-desc { font-size: 13px; color: var(--dim); margin-bottom: 12px; padding-left: 4px; }
+
+  .signal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .signal-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .signal-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .dot-SAFE { background: var(--safe); box-shadow: 0 0 8px rgba(34,197,94,.4); }
+  .dot-WARNING { background: var(--warn); box-shadow: 0 0 8px rgba(245,158,11,.4); }
+  .dot-DANGER { background: var(--danger); box-shadow: 0 0 8px rgba(239,68,68,.4); animation: pulse 2s infinite; }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(239,68,68,.4); }
+    50% { box-shadow: 0 0 16px rgba(239,68,68,.8); }
+  }
+  .signal-info { flex: 1; }
+  .signal-name { font-size: 14px; font-weight: 500; }
+  .signal-msg { font-size: 13px; color: var(--dim); margin-top: 2px; }
+  .signal-help { font-size: 12px; color: var(--dim2); margin-top: 6px; line-height: 1.5; }
+  .signal-score {
+    font-size: 14px; font-weight: 600;
+    padding: 4px 10px; border-radius: 8px;
+    background: rgba(255,255,255,.05);
+    flex-shrink: 0;
+  }
+
+  .stock-table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .stock-table { width: 100%; border-collapse: collapse; }
+  .stock-table th {
+    text-align: left; padding: 12px 16px; font-size: 12px;
+    color: var(--dim); font-weight: 500;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,.02);
+  }
+  .stock-table td { padding: 10px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
+  .stock-table tr:last-child td { border-bottom: none; }
+  .stock-table tr:hover td { background: rgba(255,255,255,.03); }
+  .stock-tip { font-size: 12px; color: var(--dim2); margin-top: 2px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+  .badge-SAFE { background: rgba(34,197,94,.12); color: var(--safe); }
+  .badge-WARNING { background: rgba(245,158,11,.12); color: var(--warn); }
+  .badge-DANGER { background: rgba(239,68,68,.12); color: var(--danger); }
+
+  .guide-banner {
+    background: linear-gradient(135deg, #1a2440 0%, #1a1d2e 100%);
+    border: 1px solid #2a3a5e;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+  .guide-banner h3 { font-size: 15px; font-weight: 600; color: var(--accent); margin-bottom: 10px; }
+  .guide-row { display: flex; gap: 24px; flex-wrap: wrap; }
+  .guide-item { flex: 1; min-width: 200px; font-size: 13px; line-height: 1.6; color: var(--dim); }
+  .guide-item strong { color: var(--text); }
+  .guide-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .guide-dot-safe { background: var(--safe); }
+  .guide-dot-warn { background: var(--warn); }
+  .guide-dot-danger { background: var(--danger); }
+
+  .footer { text-align: center; padding: 20px; color: var(--dim); font-size: 12px; }
+  .loading { text-align: center; padding: 60px; color: var(--dim); font-size: 16px; }
+  .spinner {
+    display: inline-block; width: 24px; height: 24px;
+    border: 3px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin .8s linear infinite;
+    margin-right: 8px; vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>NTS 경제뉴탐사 위험경고 대시보드</h1>
+    <div class="time" id="timestamp">로딩 중...</div>
+  </div>
+  <button class="refresh-btn" onclick="location.reload()">새로고침</button>
+</div>
+
+<div class="container" id="app">
+  <div class="loading"><span class="spinner"></span> 데이터 로딩 중...</div>
+</div>
+
+<script>
+const LEVEL_KR = { DANGER: '위험', WARNING: '주의', SAFE: '안전' };
+
+const SIGNAL_HELP = {
+  '수급 괴리': '개인 투자자만 사고, 외국인/기관은 파는 구조인지 봅니다. 혼자만 사는 건 위험 신호예요.',
+  '반등장 추격매수': '주가가 바닥에서 많이 올랐을 때 뒤늦게 사면 고점에 물릴 수 있어요.',
+  '거래량 체력': '주가가 올라도 거래량이 적으면 "진짜 반등"이 아닐 수 있어요. 사람이 적은 시장은 쉽게 무너져요.',
+  '신용융자 잔고': '빚내서 주식 산 사람이 많아지면, 주가 하락 시 강제로 팔리는 "반대매매"가 연쇄적으로 터질 수 있어요.',
+  '뉴스 착각 패턴': '좋은 뉴스가 나오면 이미 가격에 반영된 경우가 많아요. 뉴스 보고 바로 사면 늦을 수 있어요.',
+  '구정보 함정': '실적 발표나 이벤트가 이미 오래 전 일이라면, 지금 오르는 건 그 재료가 아닐 수 있어요.',
+};
+
+function stockTip(msg) {
+  if (msg.includes('급등')) return '급등한 종목을 지금 사면 고점에 물릴 수 있어요';
+  if (msg.includes('급감')) return '갑자기 거래량이 줄었어요 - 관심이 식고 있다는 신호';
+  if (msg.includes('괴리')) return '개인만 사고 외국인은 팔고 있어요 - 주의';
+  return '';
+}
+
+function adviceText(level, score, data) {
+  const m = data.market || {};
+  const chg = (m.index_change || 0);
+  if (level === 'DANGER')
+    return { title: '지금은 매수를 멈추고 관망하세요', body: '여러 위험 신호가 동시에 켜졌습니다. 이런 날에 매수하면 큰 손실을 볼 수 있어요. 이미 보유 중이라면 손절 라인을 꼭 확인하세요.' };
+  if (level === 'WARNING')
+    return { title: '조심하면서 지켜보세요', body: '일부 위험 신호가 감지됐습니다. 신규 매수는 소액으로만 하고, 급등 종목 추격매수는 피하세요.' };
+  if (chg > 3)
+    return { title: '시장은 안전하지만, 급등일에는 신중하게', body: '오늘 시장이 ' + chg.toFixed(1) + '% 올랐어요. 위험 신호는 없지만 이런 날 흥분해서 매수하면 다음 날 조정에 물릴 수 있어요. 분할매수를 추천합니다.' };
+  if (chg < -2)
+    return { title: '시장이 하락했지만 위험 신호는 없어요', body: '무서워서 손절하기보다 내 종목의 기본 가치를 다시 확인해보세요. 패닉에 팔면 후회할 수 있어요.' };
+  return { title: '현재 시장은 안정적이에요', body: '특별한 위험 신호가 없는 날입니다. 평소 관심 종목을 공부하기 좋은 시간이에요.' };
+}
+
+function fmtTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0') + ' ' +
+    String(d.getHours()).padStart(2,'0') + ':' +
+    String(d.getMinutes()).padStart(2,'0');
+}
+
+function render(data) {
+  const m = data.market || {};
+  const app = document.getElementById('app');
+  const adv = adviceText(data.overall_level, data.total_score, data);
+  const dangerCount = (data.stock_signals||[]).filter(s=>s.level==='DANGER').length;
+
+  app.innerHTML =
+    '<div class="guide-banner">' +
+      '<h3>이 대시보드 보는 법</h3>' +
+      '<div class="guide-row">' +
+        '<div class="guide-item"><strong>종합 점수</strong><br>0~100점으로 시장 위험도를 알려줘요.<br>' +
+          '<span class="guide-dot guide-dot-safe"></span>0~29 안전 ' +
+          '<span class="guide-dot guide-dot-warn"></span>30~59 주의 ' +
+          '<span class="guide-dot guide-dot-danger"></span>60+ 위험</div>' +
+        '<div class="guide-item"><strong>시장 신호 6가지</strong><br>각각 다른 함정을 감시해요.<br>초록불이면 OK, 노란불은 조심, 빨간불은 매수 금지!</div>' +
+        '<div class="guide-item"><strong>종목별 경고</strong><br>오늘 이상 움직임이 있는 종목들이에요.<br>여기 뜬 종목은 추격매수하지 마세요.</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="score-card">' +
+      '<div class="score" style="color: var(--' + (data.overall_level === 'SAFE' ? 'safe' : data.overall_level === 'WARNING' ? 'warn' : 'danger') + ')">' + data.total_score + '</div>' +
+      '<div class="label">종합 위험 점수 / 100</div>' +
+      '<div class="verdict verdict-' + data.overall_level + '">' + LEVEL_KR[data.overall_level] + '</div>' +
+    '</div>' +
+
+    '<div class="advice-box">' +
+      '<div class="advice-title">' + adv.title + '</div>' +
+      '<div class="advice-body">' + adv.body + '</div>' +
+    '</div>' +
+
+    '<div class="section-title">오늘의 시장</div>' +
+    '<div class="section-desc">주식시장 전체가 어떻게 움직이고 있는지 한눈에 보여줘요</div>' +
+    '<div class="market-bar">' +
+      '<div class="item">' +
+        '<div class="val ' + (m.index_change >= 0 ? 'val-up' : 'val-down') + '">' + (m.index ? m.index.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) : '-') + '</div>' +
+        '<div class="lbl">KOSPI ' + (m.index_change >= 0 ? '+' : '') + (m.index_change||0).toFixed(2) + '%</div>' +
+        '<div class="help">한국 주식시장 전체 지수<br>' + (m.index_change > 0 ? '오늘 시장이 올랐어요' : m.index_change < 0 ? '오늘 시장이 내렸어요' : '변동 없음') + '</div>' +
+      '</div>' +
+      '<div class="item">' +
+        '<div class="val">' + (m.trade_value ? Math.round(m.trade_value).toLocaleString() : '-') + '</div>' +
+        '<div class="lbl">거래대금 (억원)</div>' +
+        '<div class="help">오늘 사고팔린 총 금액<br>많을수록 시장에 사람이 많아요</div>' +
+      '</div>' +
+      '<div class="item">' +
+        '<div class="val ' + ((m.individual||0) >= 0 ? 'val-up' : 'val-down') + '">' + (m.individual ? (m.individual >= 0 ? '+' : '') + Math.round(m.individual).toLocaleString() : '0') + '</div>' +
+        '<div class="lbl">개인</div>' +
+        '<div class="help">' + ((m.individual||0) > 0 ? '개인이 사는 중' : (m.individual||0) < 0 ? '개인이 파는 중' : '장 마감 후 데이터 없음') + '</div>' +
+      '</div>' +
+      '<div class="item">' +
+        '<div class="val ' + ((m.foreign||0) >= 0 ? 'val-up' : 'val-down') + '">' + (m.foreign ? (m.foreign >= 0 ? '+' : '') + Math.round(m.foreign).toLocaleString() : '0') + '</div>' +
+        '<div class="lbl">외국인</div>' +
+        '<div class="help">' + ((m.foreign||0) > 0 ? '외국인이 사는 중' : (m.foreign||0) < 0 ? '외국인이 파는 중 (주의)' : '장 마감 후 데이터 없음') + '</div>' +
+      '</div>' +
+      '<div class="item">' +
+        '<div class="val ' + ((m.institution||0) >= 0 ? 'val-up' : 'val-down') + '">' + (m.institution ? (m.institution >= 0 ? '+' : '') + Math.round(m.institution).toLocaleString() : '0') + '</div>' +
+        '<div class="lbl">기관</div>' +
+        '<div class="help">' + ((m.institution||0) > 0 ? '기관이 사는 중' : (m.institution||0) < 0 ? '기관이 파는 중 (주의)' : '장 마감 후 데이터 없음') + '</div>' +
+      '</div>' +
+      '<div class="item">' +
+        '<div class="val">' + (m.margin_rate ? m.margin_rate.toFixed(2) + '%' : '-') + '</div>' +
+        '<div class="lbl">빚투 비율</div>' +
+        '<div class="help">빚내서 주식 산 비율<br>높으면 폭락 시 위험해요</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="section-title">함정 감시 신호 6가지</div>' +
+    '<div class="section-desc">각 신호가 초록이면 안전, 노랑이면 조심, 빨강이면 매수를 멈추세요</div>' +
+    '<div class="signal-grid">' +
+      (data.market_signals || []).map(function(s) {
+        return '<div class="signal-card">' +
+          '<div class="signal-dot dot-' + s.level + '"></div>' +
+          '<div class="signal-info">' +
+            '<div class="signal-name">' + s.name + '</div>' +
+            '<div class="signal-msg">' + s.message + '</div>' +
+            '<div class="signal-help">' + (SIGNAL_HELP[s.name] || '') + '</div>' +
+          '</div>' +
+          '<div class="signal-score">' + s.score + '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>' +
+
+    '<div class="section-title">주의 종목 리스트' + (dangerCount > 0 ? ' (위험 ' + dangerCount + '개!)' : '') + '</div>' +
+    '<div class="section-desc">오늘 비정상적으로 움직인 종목들이에요. 여기 뜬 종목은 지금 사지 마세요!</div>' +
+    '<div class="stock-table-wrap"><table class="stock-table">' +
+      '<thead><tr><th>상태</th><th>종목</th><th>무슨 일이?</th><th>위험도</th></tr></thead>' +
+      '<tbody>' +
+        (data.stock_signals || []).map(function(s) {
+          var tip = stockTip(s.message);
+          return '<tr>' +
+            '<td><span class="badge badge-' + s.level + '">' + LEVEL_KR[s.level] + '</span></td>' +
+            '<td>' + s.name + '</td>' +
+            '<td><div>' + s.message + '</div>' + (tip ? '<div class="stock-tip">' + tip + '</div>' : '') + '</td>' +
+            '<td>' + s.score + '</td>' +
+          '</tr>';
+        }).join('') +
+      '</tbody>' +
+    '</table></div>' +
+
+    '<div class="footer">' +
+      'NTS 경제뉴탐사 &mdash; 데이터: 한국투자증권 Open API<br>' +
+      '<span style="color:var(--dim2)">이 대시보드는 투자 참고용이며, 투자 판단의 책임은 본인에게 있습니다.</span>' +
+    '</div>';
+}
+
+fetch('data.json')
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    document.getElementById('timestamp').textContent = fmtTime(data.timestamp) + ' 기준';
+    render(data);
+  })
+  .catch(function() {
+    document.getElementById('app').innerHTML = '<div class="loading">데이터를 불러올 수 없어요.</div>';
+  });
+</script>
+</body>
+</html>
